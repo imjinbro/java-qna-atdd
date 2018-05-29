@@ -1,6 +1,7 @@
 package codesquad.web;
 
 import codesquad.domain.UserRepository;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -9,12 +10,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-
-import java.util.Arrays;
+import support.test.HtmlFormDataBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertNotNull;
@@ -31,19 +32,21 @@ public class LoginAcceptanceTest {
     @Autowired
     private TestRestTemplate template;
 
+    private HtmlFormDataBuilder builder;
+
+    @Before
+    public void setUp() throws Exception {
+        builder = HtmlFormDataBuilder.encodeform();
+    }
+
     @Test
     public void login() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setAccept(Arrays.asList(MediaType.TEXT_HTML));
-        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-
         String userId = "javajigi";
-        MultiValueMap<String, Object> params = new LinkedMultiValueMap<>();
-        params.add("userId", userId);
-        params.add("password", "test");
-        HttpEntity<MultiValueMap<String, Object>> request = new HttpEntity<>(params, headers);
-
+        builder.addParameter("userId", userId);
+        builder.addParameter("password", "test");
+        HttpEntity<MultiValueMap<String, Object>> request = builder.build();
         ResponseEntity<String> response = template.postForEntity("/users/login", request, String.class);
+
         assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
         assertThat(response.getHeaders().getLocation().getPath(), is("/users"));
         assertNotNull(userRepo.findByUserId(userId));
