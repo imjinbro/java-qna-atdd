@@ -7,6 +7,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 
 import codesquad.UnAuthenticationException;
+import codesquad.UnAuthorizedException;
 import codesquad.security.HttpSessionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,15 +52,10 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public String login(String userId, String password, HttpSession session) {
-        try {
-            User user = userService.login(userId, password);
-            session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
-            return "redirect:/users";
-        } catch (UnAuthenticationException e) {
-            log.error("login err : {}", e.getMessage());
-            return "/user/login_failed";
-        }
+    public String login(String userId, String password, HttpSession session) throws UnAuthenticationException {
+        User user = userService.login(userId, password);
+        session.setAttribute(HttpSessionUtils.USER_SESSION_KEY, user);
+        return "redirect:/users";
     }
 
     @GetMapping("/{id}/form")

@@ -18,8 +18,7 @@ import org.springframework.util.MultiValueMap;
 import support.test.HtmlFormDataBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -51,5 +50,28 @@ public class LoginAcceptanceTest {
         assertThat(response.getHeaders().getLocation().getPath(), is("/users"));
         assertNotNull(userRepo.findByUserId(userId));
         log.debug(response.getBody());
+    }
+
+    @Test
+    public void login_fail_invalid_password() {
+        String userId = "javajigi";
+        builder.addParameter("userId", userId);
+        builder.addParameter("password", "1111");
+        HttpEntity<MultiValueMap<String, Object>> request = builder.build();
+        ResponseEntity<String> response = template.postForEntity("/users/login", request, String.class);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    public void login_fail_invalid_userId() {
+        String userId = "colin";
+        builder.addParameter("userId", userId);
+        builder.addParameter("password", "1234");
+        HttpEntity<MultiValueMap<String, Object>> request = builder.build();
+        ResponseEntity<String> response = template.postForEntity("/users/login", request, String.class);
+
+        assertFalse(userRepo.findByUserId(userId).isPresent());
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 }
