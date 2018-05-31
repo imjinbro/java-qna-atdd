@@ -16,6 +16,7 @@ public class QnaAcceptanceTest {
 
     @Test
     public void create() {
+
     }
 
     @Test
