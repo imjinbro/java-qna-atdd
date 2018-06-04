@@ -50,7 +50,7 @@ public class QnaServiceTest {
 
     @Test(expected = EntityNotFoundException.class)
     public void read_not_exist() {
-        when(questionRepo.findById(question.getId())).thenReturn(Optional.empty());
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.empty());
         qnaService.findById(anyLong());
     }
 
@@ -62,26 +62,26 @@ public class QnaServiceTest {
     @Test
     public void update() {
         updateQuestion.writeBy(user);
-        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
         qnaService.update(user, anyLong(), updateQuestion.toQuestionDto());
     }
 
     @Test(expected = UnAuthorizedException.class)
     public void update_fail_not_math_writer() {
-        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
         qnaService.update(otherUser, anyLong(), updateQuestion.toQuestionDto());
     }
 
     //todo : remove duplicate code
     @Test
     public void delete() throws Exception {
-        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
         qnaService.deleteQuestion(user, anyLong());
     }
 
     @Test(expected = UnAuthorizedException.class)
     public void delete_fail_not_owner() throws Exception {
-        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
         qnaService.deleteQuestion(otherUser, anyLong());
     }
 }
