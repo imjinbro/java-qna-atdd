@@ -1,22 +1,19 @@
 package codesquad.service;
 
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Resource;
-
+import codesquad.CannotDeleteException;
+import codesquad.ForbiddenRequestException;
+import codesquad.domain.*;
+import codesquad.dto.QuestionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import codesquad.CannotDeleteException;
-import codesquad.domain.Answer;
-import codesquad.domain.AnswerRepository;
-import codesquad.domain.Question;
-import codesquad.domain.QuestionRepository;
-import codesquad.domain.User;
+import javax.annotation.Resource;
+import java.util.List;
+import java.util.Optional;
 
 @Service("qnaService")
 public class QnaService {
@@ -31,23 +28,25 @@ public class QnaService {
     @Resource(name = "deleteHistoryService")
     private DeleteHistoryService deleteHistoryService;
 
-    public Question create(User loginUser, Question question) {
+    public Question create(User loginUser, QuestionDto questionDto) {
+        Question question = questionDto.toQuestion();
         question.writeBy(loginUser);
-        log.debug("question : {}", question);
         return questionRepository.save(question);
     }
 
-    public Optional<Question> findById(long id) {
+    public Optional<Question> findById(Long id) {
         return questionRepository.findById(id);
     }
 
-    public Question update(User loginUser, long id, Question updatedQuestion) {
-        // TODO 수정 기능 구현
-        return null;
+    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws DataAccessException {
+        Optional<Question> maybeQuestion = questionRepository.findById(id);
+        QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(ForbiddenRequestException::new);
+        questionRepository.save(maybeQuestion.get());
+        return questionDto;
     }
 
     @Transactional
-    public void deleteQuestion(User loginUser, long questionId) throws CannotDeleteException {
+    public void deleteQuestion(User loginUser, Long id) throws CannotDeleteException {
         // TODO 삭제 기능 구현
     }
 

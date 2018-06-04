@@ -1,24 +1,16 @@
 package codesquad.domain;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.ForeignKey;
-import javax.persistence.JoinColumn;
-import javax.persistence.Lob;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.validation.constraints.Size;
-
-import org.hibernate.annotations.Where;
-
+import codesquad.ForbiddenRequestException;
+import codesquad.UnAuthorizedException;
 import codesquad.dto.QuestionDto;
+import org.hibernate.annotations.Where;
 import support.domain.AbstractEntity;
 import support.domain.UrlGeneratable;
+
+import javax.persistence.*;
+import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Question extends AbstractEntity implements UrlGeneratable {
@@ -90,5 +82,18 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     @Override
     public String toString() {
         return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
+    }
+
+    public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) {
+        if (!(getId().equals(updatedQuestionDto.getId()))) {
+            throw new ForbiddenRequestException("not same question");
+        }
+
+        if (!writer.equals(loginUser)) {
+            throw new UnAuthorizedException("not match writer");
+        }
+        title = updatedQuestionDto.getTitle();
+        contents = updatedQuestionDto.getContents();
+        return toQuestionDto();
     }
 }

@@ -1,38 +1,41 @@
 package codesquad.web;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
+import support.test.AcceptanceTest;
+import support.test.HtmlFormDataBuilder;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class QnaAcceptanceTest {
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-    @Autowired
-    private TestRestTemplate testRestTemplate;
+public class QnaAcceptanceTest extends AcceptanceTest {
+    private static final Logger log = LoggerFactory.getLogger(UserAcceptanceTest.class);
 
-    @Test
-    public void create() {
-
+    private ResponseEntity<String> create(TestRestTemplate template) throws Exception {
+        HtmlFormDataBuilder builder = HtmlFormDataBuilder.encodeform();
+        builder.addParameter("title", "test~~~~~!");
+        builder.addParameter("contents", "test content");
+        HttpEntity<MultiValueMap<String, Object>> request = builder.build();
+        return template.postForEntity("/questions", request, String.class);
     }
 
     @Test
-    public void create_fail_require_login() {
+    public void create() throws Exception {
+        ResponseEntity<String> response = create(basicAuthTemplate());
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        log.debug("question created body : {}", response.getBody());
     }
 
     @Test
-    public void create_fail_min_title() {
-    }
-
-    @Test
-    public void create_fail_max_title() {
-    }
-
-    @Test
-    public void create_fail_min_contents() {
+    public void create_fail_require_login() throws Exception {
+        ResponseEntity<String> response = create(template());
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
@@ -45,26 +48,17 @@ public class QnaAcceptanceTest {
 
     @Test
     public void update() {
+
     }
 
     @Test
     public void update_fail_require_login() {
+
     }
 
     @Test
     public void update_fail_not_math_writer() {
-    }
 
-    @Test
-    public void update_fail_min_title() {
-    }
-
-    @Test
-    public void update_fail_max_title() {
-    }
-
-    @Test
-    public void update_fail_min_contents() {
     }
 
     @Test

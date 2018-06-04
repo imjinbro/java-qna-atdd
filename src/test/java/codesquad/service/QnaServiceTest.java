@@ -1,13 +1,16 @@
 package codesquad.service;
 
+import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
+import codesquad.domain.User;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QnaServiceTest {
@@ -18,24 +21,21 @@ public class QnaServiceTest {
     @InjectMocks
     private QnaService qnaService;
 
+    private Question question;
+
+    private User user;
+    private User otherUser;
+
+    @Before
+    public void setUp() throws Exception {
+        user = new User("colin", "password", "colin", "colin@codesquad.kr");
+        otherUser = new User("jinbro", "password", "jinbro", "jinbro@codesquad.kr");
+        question = new Question("test", "testing!");
+    }
+
     @Test
     public void create() {
-    }
-
-    @Test
-    public void create_fail_require_login() {
-    }
-
-    @Test
-    public void create_fail_min_title() {
-    }
-
-    @Test
-    public void create_fail_max_title() {
-    }
-
-    @Test
-    public void create_fail_min_contents() {
+        when(qnaService.create(user, question.toQuestionDto())).thenReturn(question);
     }
 
     @Test
@@ -52,22 +52,27 @@ public class QnaServiceTest {
 
     @Test
     public void update_fail_require_login() {
+
     }
 
     @Test
     public void update_fail_not_math_writer() {
+
     }
 
     @Test
     public void update_fail_min_title() {
+
     }
 
     @Test
     public void update_fail_max_title() {
+
     }
 
     @Test
     public void update_fail_min_contents() {
+
     }
 
     @Test
