@@ -1,5 +1,6 @@
 package codesquad.domain;
 
+import codesquad.CannotDeleteException;
 import codesquad.ForbiddenRequestException;
 import codesquad.UnAuthorizedException;
 import codesquad.dto.QuestionDto;
@@ -95,5 +96,16 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         title = updatedQuestionDto.getTitle();
         contents = updatedQuestionDto.getContents();
         return toQuestionDto();
+    }
+
+    public void delete(User loginUser) throws CannotDeleteException, UnAuthorizedException {
+        if (isDeleted()) {
+            throw new CannotDeleteException("");
+        }
+
+        if (!writer.equals(loginUser)) {
+            throw new UnAuthorizedException("not match writer");
+        }
+        deleted = true;
     }
 }
