@@ -5,7 +5,7 @@ import codesquad.domain.Question;
 import javax.validation.constraints.Size;
 
 public class QuestionDto {
-    private Long id;
+    private long id;
 
     @Size(min = 3, max = 100)
     private String title;
@@ -26,7 +26,7 @@ public class QuestionDto {
         this.contents = contents;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

@@ -1,6 +1,7 @@
 package codesquad.service;
 
 import codesquad.ForbiddenRequestException;
+import codesquad.UnAuthorizedException;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
@@ -27,6 +28,7 @@ public class QnaServiceTest {
     private QnaService qnaService;
 
     private Question question;
+    private Question updateQuestion;
 
     private User user;
     private User otherUser;
@@ -36,6 +38,9 @@ public class QnaServiceTest {
         user = new User("colin", "password", "colin", "colin@codesquad.kr");
         otherUser = new User("jinbro", "password", "jinbro", "jinbro@codesquad.kr");
         question = new Question("test", "testing!");
+        question.writeBy(user);
+        updateQuestion = new Question("modify test", "modify");
+        updateQuestion.writeBy(user);
     }
 
     @Test
@@ -57,16 +62,15 @@ public class QnaServiceTest {
 
     @Test
     public void update() {
+        updateQuestion.writeBy(user);
+        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        qnaService.update(user, anyLong(), updateQuestion.toQuestionDto());
     }
 
-    @Test
-    public void update_fail_require_login() {
-
-    }
-
-    @Test
+    @Test(expected = UnAuthorizedException.class)
     public void update_fail_not_math_writer() {
-
+        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        qnaService.update(otherUser, anyLong(), updateQuestion.toQuestionDto());
     }
 
     @Test

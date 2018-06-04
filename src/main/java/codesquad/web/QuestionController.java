@@ -1,6 +1,7 @@
 package codesquad.web;
 
 import codesquad.ForbiddenRequestException;
+import codesquad.UnAuthorizedException;
 import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import support.domain.EntityName;
 import support.domain.ViewPath;
 
+import javax.annotation.Resource;
+
 import static support.domain.EntityName.getModelName;
 import static support.domain.ViewPath.getViewPath;
 
@@ -23,6 +26,7 @@ import static support.domain.ViewPath.getViewPath;
 public class QuestionController {
     private static final Logger log = LoggerFactory.getLogger(QuestionController.class);
 
+    @Resource
     private QnaService qnaService;
 
     @Autowired
@@ -38,21 +42,20 @@ public class QuestionController {
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) throws ForbiddenRequestException {
         Question question = qnaService.findById(id);
-        log.debug("question : {} ", question);
         model.addAttribute(getModelName(EntityName.QUESTION), question);
         return getViewPath(ViewPath.QNA_SHOW);
     }
 
     @GetMapping("/{id}/form")
-    public String edit(@LoginUser User loginUser, @PathVariable Long id, Model model) throws ForbiddenRequestException {
-
-        return null;
+    public String edit(@LoginUser User loginUser, @PathVariable Long id, Model model) throws ForbiddenRequestException, UnAuthorizedException {
+        model.addAttribute(getModelName(EntityName.QUESTION), qnaService.findById(loginUser, id));
+        return getViewPath(ViewPath.QNA_EDIT);
     }
 
     @PutMapping("/{id}")
-    public String update(@LoginUser User loginUser, @PathVariable Long id, Question updateQuestion) {
-
-        return null;
+    public String update(@LoginUser User loginUser, @PathVariable Long id, QuestionDto updateQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
+        QuestionDto updatedQuestionDto = qnaService.update(loginUser, id, updateQuestionDto);
+        return updatedQuestionDto.toQuestion().generateRedirectUrl();
     }
 
     @DeleteMapping("/{id}")

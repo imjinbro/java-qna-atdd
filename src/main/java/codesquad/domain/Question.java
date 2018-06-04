@@ -90,7 +90,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
     }
 
-    public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) {
+    public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
         if (!isMatch(updatedQuestionDto)) {
             throw new ForbiddenRequestException("not same question");
         }
@@ -102,7 +102,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
 
     public void delete(User loginUser) throws CannotDeleteException, UnAuthorizedException {
         if (isDeleted()) {
-            throw new CannotDeleteException("");
+            throw new CannotDeleteException("not exist question");
         }
         validateAuthorize(loginUser);
         deleted = true;

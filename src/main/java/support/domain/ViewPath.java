@@ -1,7 +1,8 @@
 package support.domain;
 
 public enum ViewPath {
-    QNA_SHOW("/qna/show");
+    QNA_SHOW("/qna/show"),
+    QNA_EDIT("/qna/form");
 
     private String path;
 

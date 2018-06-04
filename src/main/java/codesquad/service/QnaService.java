@@ -2,6 +2,7 @@ package codesquad.service;
 
 import codesquad.CannotDeleteException;
 import codesquad.ForbiddenRequestException;
+import codesquad.UnAuthorizedException;
 import codesquad.domain.*;
 import codesquad.dto.QuestionDto;
 import org.slf4j.Logger;
@@ -19,10 +20,10 @@ public class QnaService {
     private static final Logger log = LoggerFactory.getLogger(QnaService.class);
 
     @Resource(name = "questionRepository")
-    private QuestionRepository questionRepository;
+    private QuestionRepository questionRepo;
 
     @Resource(name = "answerRepository")
-    private AnswerRepository answerRepository;
+    private AnswerRepository answerRepo;
 
     @Resource(name = "deleteHistoryService")
     private DeleteHistoryService deleteHistoryService;
@@ -30,17 +31,25 @@ public class QnaService {
     public Question create(User loginUser, QuestionDto questionDto) {
         Question question = questionDto.toQuestion();
         question.writeBy(loginUser);
-        return questionRepository.save(question);
+        return questionRepo.save(question);
     }
 
     public Question findById(Long id) throws ForbiddenRequestException {
-        return questionRepository.findById(id).filter(question -> !question.isDeleted()).orElseThrow(ForbiddenRequestException::new);
+        return questionRepo.findById(id).filter(question -> !question.isDeleted()).orElseThrow(ForbiddenRequestException::new);
     }
 
-    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws ForbiddenRequestException {
-        Optional<Question> maybeQuestion = questionRepository.findById(id);
+    public Question findById(User loginUser, Long id) throws ForbiddenRequestException, UnAuthorizedException {
+        Question question = findById(id);
+        if (!question.isOwner(loginUser)) {
+            throw new UnAuthorizedException();
+        }
+        return question;
+    }
+
+    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
+        Optional<Question> maybeQuestion = questionRepo.findById(id);
         QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(ForbiddenRequestException::new);
-        questionRepository.save(maybeQuestion.get());
+        questionRepo.save(maybeQuestion.get());
         return questionDto;
     }
 
@@ -50,11 +59,11 @@ public class QnaService {
     }
 
     public Iterable<Question> findAll() {
-        return questionRepository.findByDeleted(false);
+        return questionRepo.findByDeleted(false);
     }
 
     public List<Question> findAll(Pageable pageable) {
-        return questionRepository.findAll(pageable).getContent();
+        return questionRepo.findAll(pageable).getContent();
     }
 
     public Answer addAnswer(User loginUser, long questionId, String contents) {
