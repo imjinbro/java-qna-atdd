@@ -86,13 +86,10 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     }
 
     public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) {
-        if (!(getId().equals(updatedQuestionDto.getId()))) {
+        if (!isMatch(updatedQuestionDto)) {
             throw new ForbiddenRequestException("not same question");
         }
-
-        if (!writer.equals(loginUser)) {
-            throw new UnAuthorizedException("not match writer");
-        }
+        validateAuthorize(loginUser);
         title = updatedQuestionDto.getTitle();
         contents = updatedQuestionDto.getContents();
         return toQuestionDto();
@@ -102,10 +99,18 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         if (isDeleted()) {
             throw new CannotDeleteException("");
         }
+        validateAuthorize(loginUser);
+        deleted = true;
+    }
 
+    private boolean isMatch(QuestionDto questionDto) {
+        Long requestId = questionDto.getId();
+        return requestId != null && getId().equals(requestId);
+    }
+
+    private void validateAuthorize(User loginUser) throws UnAuthorizedException {
         if (!writer.equals(loginUser)) {
             throw new UnAuthorizedException("not match writer");
         }
-        deleted = true;
     }
 }
