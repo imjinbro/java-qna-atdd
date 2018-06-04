@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 public class AbstractEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id;
 
     @CreatedDate
     private LocalDateTime createDate;
@@ -31,7 +31,7 @@ public class AbstractEntity {
         this.id = id;
     }
 
-    public Long getId() {
+    public long getId() {
         return id;
     }
 

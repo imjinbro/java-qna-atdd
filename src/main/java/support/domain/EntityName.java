@@ -11,11 +11,11 @@ public enum EntityName {
         this.multiple = multiple;
     }
 
-    public static String getSingle(EntityName entity) {
+    public static String getModelName(EntityName entity) {
         return entity.single;
     }
 
-    public static String getMultiple(EntityName entity) {
+    public static String getModelNameOfMulti(EntityName entity) {
         return entity.multiple;
     }
 }

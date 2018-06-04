@@ -12,6 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import support.domain.EntityName;
+import support.domain.ViewPath;
+
+import static support.domain.EntityName.getModelName;
+import static support.domain.ViewPath.getViewPath;
 
 @Controller
 @RequestMapping("/questions")
@@ -32,7 +37,10 @@ public class QuestionController {
 
     @GetMapping("/{id}")
     public String show(@PathVariable Long id, Model model) throws ForbiddenRequestException {
-        return null;
+        Question question = qnaService.findById(id);
+        log.debug("question : {} ", question);
+        model.addAttribute(getModelName(EntityName.QUESTION), question);
+        return getViewPath(ViewPath.QNA_SHOW);
     }
 
     @GetMapping("/{id}/form")

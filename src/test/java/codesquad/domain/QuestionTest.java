@@ -38,6 +38,16 @@ public class QuestionTest {
     }
 
     @Test
+    public void update() {
+        question1.update(user1, question1.toQuestionDto());
+    }
+
+    @Test(expected = UnAuthorizedException.class)
+    public void update_not_match_writer() {
+        question1.update(user2, question1.toQuestionDto());
+    }
+
+    @Test
     public void deleted() throws Exception {
         question1.delete(user1);
         assertTrue(question1.isDeleted());

@@ -40,10 +40,15 @@ public class QnaAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void read() {
+        ResponseEntity<String> response = template().getForEntity("/questions/1", String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
+        log.debug("body : {}", response.getBody());
     }
 
     @Test
-    public void read_fail_status_deleted() {
+    public void read_fail_not_exist() {
+        ResponseEntity<String> response = template().getForEntity("/questions/100", String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
     @Test
@@ -66,6 +71,12 @@ public class QnaAcceptanceTest extends AcceptanceTest {
     }
 
     @Test
+    public void delete_fail_require_login() {
+
+    }
+
+    @Test
     public void delete_fail_not_owner() {
+
     }
 }

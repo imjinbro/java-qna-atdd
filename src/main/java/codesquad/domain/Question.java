@@ -38,6 +38,11 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     }
 
     public Question(String title, String contents) {
+        this(0L, title, contents);
+    }
+
+    public Question(long id, String title, String contents) {
+        super(id);
         this.title = title;
         this.contents = contents;
     }
@@ -104,8 +109,8 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     }
 
     private boolean isMatch(QuestionDto questionDto) {
-        Long requestId = questionDto.getId();
-        return requestId != null && getId().equals(requestId);
+        long requestId = questionDto.getId();
+        return getId() == requestId;
     }
 
     private void validateAuthorize(User loginUser) throws UnAuthorizedException {

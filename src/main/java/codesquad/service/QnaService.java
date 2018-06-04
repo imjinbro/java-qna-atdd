@@ -6,7 +6,6 @@ import codesquad.domain.*;
 import codesquad.dto.QuestionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,11 +33,11 @@ public class QnaService {
         return questionRepository.save(question);
     }
 
-    public Optional<Question> findById(Long id) {
-        return questionRepository.findById(id);
+    public Question findById(Long id) throws ForbiddenRequestException {
+        return questionRepository.findById(id).filter(question -> !question.isDeleted()).orElseThrow(ForbiddenRequestException::new);
     }
 
-    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws DataAccessException {
+    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws ForbiddenRequestException {
         Optional<Question> maybeQuestion = questionRepository.findById(id);
         QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(ForbiddenRequestException::new);
         questionRepository.save(maybeQuestion.get());

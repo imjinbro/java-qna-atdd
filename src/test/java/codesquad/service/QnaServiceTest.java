@@ -1,5 +1,6 @@
 package codesquad.service;
 
+import codesquad.ForbiddenRequestException;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
@@ -10,7 +11,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import static org.mockito.Mockito.when;
+import javax.naming.AuthenticationException;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QnaServiceTest {
@@ -35,15 +40,19 @@ public class QnaServiceTest {
 
     @Test
     public void create() {
-        when(qnaService.create(user, question.toQuestionDto())).thenReturn(question);
+        qnaService.create(user, question.toQuestionDto());
+        verify(questionRepo, times(1)).save(question);
     }
 
-    @Test
-    public void read() {
+    @Test(expected = ForbiddenRequestException.class)
+    public void read_not_exist() {
+        when(questionRepo.findById(question.getId())).thenReturn(Optional.empty());
+        qnaService.findById(anyLong());
     }
 
-    @Test
-    public void read_fail_status_deleted() {
+    @Test(expected = ForbiddenRequestException.class)
+    public void read_fail_not_exist() {
+        qnaService.findById(10000L);
     }
 
     @Test
@@ -77,6 +86,11 @@ public class QnaServiceTest {
 
     @Test
     public void delete() {
+    }
+
+    @Test(expected = AuthenticationException.class)
+    public void delete_fail_require_login() {
+
     }
 
     @Test
