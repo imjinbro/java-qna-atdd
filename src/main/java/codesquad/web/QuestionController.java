@@ -1,7 +1,6 @@
 package codesquad.web;
 
-import codesquad.ForbiddenRequestException;
-import codesquad.UnAuthorizedException;
+import codesquad.CannotDeleteException;
 import codesquad.domain.Question;
 import codesquad.domain.User;
 import codesquad.dto.QuestionDto;
@@ -13,13 +12,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import support.domain.EntityName;
-import support.domain.ViewPath;
 
 import javax.annotation.Resource;
 
+import static support.domain.EntityName.QUESTION;
 import static support.domain.EntityName.getModelName;
-import static support.domain.ViewPath.getViewPath;
+import static support.domain.ViewPath.*;
 
 @Controller
 @RequestMapping("/questions")
@@ -40,27 +38,27 @@ public class QuestionController {
     }
 
     @GetMapping("/{id}")
-    public String show(@PathVariable Long id, Model model) throws ForbiddenRequestException {
+    public String show(@PathVariable Long id, Model model) {
         Question question = qnaService.findById(id);
-        model.addAttribute(getModelName(EntityName.QUESTION), question);
-        return getViewPath(ViewPath.QNA_SHOW);
+        model.addAttribute(getModelName(QUESTION), question);
+        return getViewPath(QNA_SHOW);
     }
 
     @GetMapping("/{id}/form")
-    public String edit(@LoginUser User loginUser, @PathVariable Long id, Model model) throws ForbiddenRequestException, UnAuthorizedException {
-        model.addAttribute(getModelName(EntityName.QUESTION), qnaService.findById(loginUser, id));
-        return getViewPath(ViewPath.QNA_EDIT);
+    public String edit(@LoginUser User loginUser, @PathVariable Long id, Model model) {
+        model.addAttribute(getModelName(QUESTION), qnaService.findById(loginUser, id));
+        return getViewPath(QNA_EDIT);
     }
 
     @PutMapping("/{id}")
-    public String update(@LoginUser User loginUser, @PathVariable Long id, QuestionDto updateQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
+    public String update(@LoginUser User loginUser, @PathVariable Long id, QuestionDto updateQuestionDto) {
         QuestionDto updatedQuestionDto = qnaService.update(loginUser, id, updateQuestionDto);
         return updatedQuestionDto.toQuestion().generateRedirectUrl();
     }
 
     @DeleteMapping("/{id}")
-    public String delete(@LoginUser User loginUser, @PathVariable Long id) {
-
-        return null;
+    public String delete(@LoginUser User loginUser, @PathVariable Long id) throws CannotDeleteException {
+        qnaService.deleteQuestion(loginUser, id);
+        return "redirect:/";
     }
 }

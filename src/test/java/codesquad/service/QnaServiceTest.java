@@ -1,6 +1,5 @@
 package codesquad.service;
 
-import codesquad.ForbiddenRequestException;
 import codesquad.UnAuthorizedException;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
@@ -12,7 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import javax.naming.AuthenticationException;
+import javax.persistence.EntityNotFoundException;
 import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -49,13 +48,13 @@ public class QnaServiceTest {
         verify(questionRepo, times(1)).save(question);
     }
 
-    @Test(expected = ForbiddenRequestException.class)
+    @Test(expected = EntityNotFoundException.class)
     public void read_not_exist() {
         when(questionRepo.findById(question.getId())).thenReturn(Optional.empty());
         qnaService.findById(anyLong());
     }
 
-    @Test(expected = ForbiddenRequestException.class)
+    @Test(expected = EntityNotFoundException.class)
     public void read_fail_not_exist() {
         qnaService.findById(10000L);
     }
@@ -73,31 +72,16 @@ public class QnaServiceTest {
         qnaService.update(otherUser, anyLong(), updateQuestion.toQuestionDto());
     }
 
+    //todo : remove duplicate code
     @Test
-    public void update_fail_min_title() {
-
+    public void delete() throws Exception {
+        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        qnaService.deleteQuestion(user, anyLong());
     }
 
-    @Test
-    public void update_fail_max_title() {
-
-    }
-
-    @Test
-    public void update_fail_min_contents() {
-
-    }
-
-    @Test
-    public void delete() {
-    }
-
-    @Test(expected = AuthenticationException.class)
-    public void delete_fail_require_login() {
-
-    }
-
-    @Test
-    public void delete_fail_not_owner() {
+    @Test(expected = UnAuthorizedException.class)
+    public void delete_fail_not_owner() throws Exception {
+        when(questionRepo.findById(question.getId())).thenReturn(Optional.of(question));
+        qnaService.deleteQuestion(otherUser, anyLong());
     }
 }

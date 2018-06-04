@@ -1,7 +1,6 @@
 package codesquad.domain;
 
 import codesquad.CannotDeleteException;
-import codesquad.ForbiddenRequestException;
 import codesquad.UnAuthorizedException;
 import codesquad.dto.QuestionDto;
 import org.hibernate.annotations.Where;
@@ -90,9 +89,9 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return "Question [id=" + getId() + ", title=" + title + ", contents=" + contents + ", writer=" + writer + "]";
     }
 
-    public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
+    public QuestionDto update(User loginUser, QuestionDto updatedQuestionDto) {
         if (!isMatch(updatedQuestionDto)) {
-            throw new ForbiddenRequestException("not same question");
+            throw new EntityNotFoundException("not same question");
         }
         validateAuthorize(loginUser);
         title = updatedQuestionDto.getTitle();
@@ -100,7 +99,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return toQuestionDto();
     }
 
-    public void delete(User loginUser) throws CannotDeleteException, UnAuthorizedException {
+    public void delete(User loginUser) throws CannotDeleteException {
         if (isDeleted()) {
             throw new CannotDeleteException("not exist question");
         }
@@ -113,7 +112,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return getId() == requestId;
     }
 
-    private void validateAuthorize(User loginUser) throws UnAuthorizedException {
+    private void validateAuthorize(User loginUser) {
         if (!writer.equals(loginUser)) {
             throw new UnAuthorizedException("not match writer");
         }

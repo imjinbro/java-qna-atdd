@@ -1,8 +1,10 @@
 package codesquad.web;
 
+import codesquad.domain.QuestionRepository;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
@@ -13,6 +15,7 @@ import support.test.HtmlFormDataBuilder;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class QnaAcceptanceTest extends AcceptanceTest {
     private static final Logger log = LoggerFactory.getLogger(UserAcceptanceTest.class);
@@ -22,6 +25,9 @@ public class QnaAcceptanceTest extends AcceptanceTest {
 
     private static String MODIFY_TITLE = "modify title";
     private static String MODIFY_CONTENT = "modify content";
+
+    @Autowired
+    private QuestionRepository questionRepo;
 
     private ResponseEntity<String> create(TestRestTemplate template) throws Exception {
         HtmlFormDataBuilder builder = HtmlFormDataBuilder.encodeform();
@@ -54,7 +60,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
     @Test
     public void read_fail_not_exist() {
         ResponseEntity<String> response = template().getForEntity("/questions/100", String.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
     @Test
@@ -79,7 +85,7 @@ public class QnaAcceptanceTest extends AcceptanceTest {
     @Test
     public void edit_not_exist() {
         ResponseEntity<String> response = basicAuthTemplate().getForEntity("/questions/100/form", String.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
 
@@ -110,17 +116,29 @@ public class QnaAcceptanceTest extends AcceptanceTest {
         assertThat(response.getStatusCode(), is(HttpStatus.FORBIDDEN));
     }
 
+    private ResponseEntity<String> delete(TestRestTemplate template) {
+        HtmlFormDataBuilder builder = HtmlFormDataBuilder.encodeform();
+        builder.addParameter("_method", "delete");
+        HttpEntity<MultiValueMap<String, Object>> request = builder.build();
+        return template.postForEntity("/questions/1", request, String.class);
+    }
+
     @Test
     public void delete() {
+        ResponseEntity<String> response = delete(basicAuthTemplate());
+        assertThat(response.getStatusCode(), is(HttpStatus.FOUND));
+        assertTrue(questionRepo.findById(1L).get().isDeleted());
     }
 
     @Test
     public void delete_fail_require_login() {
-
+        ResponseEntity<String> response = delete(template());
+        assertThat(response.getStatusCode(), is(HttpStatus.UNAUTHORIZED));
     }
 
     @Test
     public void delete_fail_not_owner() {
-
+        ResponseEntity<String> response = delete(basicAuthTemplate(findByUserId("sanjigi")));
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 }

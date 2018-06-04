@@ -2,10 +2,8 @@ package codesquad.security;
 
 import javax.persistence.EntityNotFoundException;
 
-import codesquad.ForbiddenRequestException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -30,12 +28,6 @@ public class SecurityControllerAdvice {
         log.debug("UnAuthorizedException is happened!");
     }
 
-    @ExceptionHandler(ForbiddenRequestException.class)
-    @ResponseStatus(value = HttpStatus.FORBIDDEN)
-    public void forbiddenRequest() {
-        log.debug("ForbiddenRequestException is happened!");
-    }
-    
     @ExceptionHandler(UnAuthenticationException.class)
     @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
     public void unAuthentication() {

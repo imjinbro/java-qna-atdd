@@ -1,7 +1,6 @@
 package codesquad.service;
 
 import codesquad.CannotDeleteException;
-import codesquad.ForbiddenRequestException;
 import codesquad.UnAuthorizedException;
 import codesquad.domain.*;
 import codesquad.dto.QuestionDto;
@@ -12,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,11 +34,11 @@ public class QnaService {
         return questionRepo.save(question);
     }
 
-    public Question findById(Long id) throws ForbiddenRequestException {
-        return questionRepo.findById(id).filter(question -> !question.isDeleted()).orElseThrow(ForbiddenRequestException::new);
+    public Question findById(Long id) {
+        return questionRepo.findById(id).filter(question -> !question.isDeleted()).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Question findById(User loginUser, Long id) throws ForbiddenRequestException, UnAuthorizedException {
+    public Question findById(User loginUser, Long id) {
         Question question = findById(id);
         if (!question.isOwner(loginUser)) {
             throw new UnAuthorizedException();
@@ -46,16 +46,16 @@ public class QnaService {
         return question;
     }
 
-    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) throws ForbiddenRequestException, UnAuthorizedException {
+    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) {
         Optional<Question> maybeQuestion = questionRepo.findById(id);
-        QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(ForbiddenRequestException::new);
+        QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(EntityNotFoundException::new);
         questionRepo.save(maybeQuestion.get());
         return questionDto;
     }
 
     @Transactional
     public void deleteQuestion(User loginUser, Long id) throws CannotDeleteException {
-        // TODO 삭제 기능 구현
+        findById(id).delete(loginUser);
     }
 
     public Iterable<Question> findAll() {
