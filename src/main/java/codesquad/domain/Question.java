@@ -120,8 +120,7 @@ public class Question extends AbstractEntity implements UrlGeneratable {
     }
 
     private boolean isMatch(QuestionDto questionDto) {
-        long requestId = questionDto.getId();
-        return getId() == requestId;
+        return getId() == questionDto.getId();
     }
 
     private void validateAuthorize(User loginUser) {

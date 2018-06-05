@@ -58,7 +58,7 @@ public class QnaService {
         deleteHistoryService.saveAll(findById(id).delete(loginUser));
     }
 
-    public Iterable<Question> findAll() {
+    public List<Question> findAll() {
         return questionRepo.findByDeleted(false);
     }
 

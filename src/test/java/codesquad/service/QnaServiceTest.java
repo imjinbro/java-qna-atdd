@@ -14,8 +14,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import javax.persistence.EntityNotFoundException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
@@ -60,6 +63,12 @@ public class QnaServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void read_fail_not_exist() {
         qnaService.findById(10000L);
+    }
+
+    @Test
+    public void findAll() {
+        when(questionRepo.findByDeleted(false)).thenReturn(Collections.singletonList(question));
+        assertEquals(1, qnaService.findAll().size());
     }
 
     @Test
