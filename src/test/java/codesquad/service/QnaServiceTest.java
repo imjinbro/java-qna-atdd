@@ -1,6 +1,8 @@
 package codesquad.service;
 
+import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
+import codesquad.domain.Answer;
 import codesquad.domain.Question;
 import codesquad.domain.QuestionRepository;
 import codesquad.domain.User;
@@ -44,8 +46,9 @@ public class QnaServiceTest {
 
     @Test
     public void create() {
-        qnaService.create(user, question.toQuestionDto());
-        verify(questionRepo, times(1)).save(question);
+        Question newQuestion = new Question("new!", "new new contents");
+        qnaService.create(user, newQuestion.toQuestionDto());
+        verify(questionRepo, times(1)).save(newQuestion);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -72,7 +75,6 @@ public class QnaServiceTest {
         qnaService.update(otherUser, anyLong(), updateQuestion.toQuestionDto());
     }
 
-    //todo : remove duplicate code
     @Test
     public void delete() throws Exception {
         when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
@@ -83,5 +85,12 @@ public class QnaServiceTest {
     public void delete_fail_not_owner() throws Exception {
         when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
         qnaService.deleteQuestion(otherUser, anyLong());
+    }
+
+    @Test(expected = CannotDeleteException.class)
+    public void delete_fail_not_answer_owner() throws Exception {
+        question.addAnswer(new Answer(otherUser, "test contents"));
+        when(questionRepo.findById(anyLong())).thenReturn(Optional.of(question));
+        qnaService.deleteQuestion(user, anyLong());
     }
 }

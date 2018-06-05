@@ -12,6 +12,8 @@ import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
 
+import static codesquad.domain.ContentType.QUESTION;
+
 @Entity
 public class Question extends AbstractEntity implements UrlGeneratable {
     @Size(min = 3, max = 100)
@@ -99,12 +101,22 @@ public class Question extends AbstractEntity implements UrlGeneratable {
         return toQuestionDto();
     }
 
-    public void delete(User loginUser) throws CannotDeleteException {
+    public List<DeleteHistory> delete(User loginUser) throws CannotDeleteException {
         if (isDeleted()) {
             throw new CannotDeleteException("not exist question");
         }
+        ArrayList<DeleteHistory> histories = new ArrayList<>();
         validateAuthorize(loginUser);
         deleted = true;
+        histories.add(DeleteHistory.convert(QUESTION, loginUser, this));
+        deleteAnswers(loginUser, histories);
+        return histories;
+    }
+
+    private void deleteAnswers(User loginUser, List<DeleteHistory> histories) throws CannotDeleteException {
+        for (Answer answer : answers) {
+            histories.add(answer.delete(loginUser));
+        }
     }
 
     private boolean isMatch(QuestionDto questionDto) {

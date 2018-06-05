@@ -63,9 +63,19 @@ public class QuestionTest {
         question1.delete(user2);
     }
 
-    @Test(expected = CannotDeleteException.class)
-    public void delete_fail_already_delete() throws Exception {
+    private Answer generateAnswer(User user) {
+        return new Answer(user, "test contents");
+    }
+
+    @Test
+    public void delete_including_my_answer() throws Exception {
+        question1.addAnswer(generateAnswer(user1));
         question1.delete(user1);
+    }
+
+    @Test(expected = CannotDeleteException.class)
+    public void delete_fail_exist_other_user_answer() throws Exception {
+        question1.addAnswer(generateAnswer(user2));
         question1.delete(user1);
     }
 }
