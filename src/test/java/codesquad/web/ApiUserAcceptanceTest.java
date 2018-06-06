@@ -11,6 +11,8 @@ import codesquad.domain.User;
 import codesquad.dto.UserDto;
 import support.test.AcceptanceTest;
 
+import java.util.Arrays;
+
 public class ApiUserAcceptanceTest extends AcceptanceTest {
 
     @Test
@@ -23,7 +25,27 @@ public class ApiUserAcceptanceTest extends AcceptanceTest {
         UserDto dbUser = basicAuthTemplate(findByUserId(newUser.getUserId())).getForObject(location, UserDto.class);
         assertThat(dbUser, is(newUser));
     }
-    
+
+    private String createUserName(int length) {
+        char[] name = new char[length];
+        Arrays.fill(name, '*');
+        return String.valueOf(name);
+    }
+
+    @Test
+    public void create_invalid_request_body_min() throws Exception {
+        UserDto newUser = createUserDto(createUserName(2));
+        ResponseEntity<String> response = template().postForEntity("/api/users", newUser, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
+    @Test
+    public void create_invalid_request_body_max() throws Exception {
+        UserDto newUser = createUserDto(createUserName(21));
+        ResponseEntity<String> response = template().postForEntity("/api/users", newUser, String.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
+    }
+
     @Test
     public void show_다른_사람() throws Exception {
         UserDto newUser = createUserDto("testuser2");
