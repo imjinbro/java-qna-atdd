@@ -14,6 +14,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.validation.Valid;
 
 import static support.domain.EntityName.QUESTION;
 import static support.domain.EntityName.getModelName;
@@ -33,7 +34,7 @@ public class QuestionController {
     }
 
     @PostMapping
-    public String create(@LoginUser User loginUser, QuestionDto questionDto) {
+    public String create(@LoginUser User loginUser, @Valid QuestionDto questionDto) {
         return qnaService.create(loginUser, questionDto).generateRedirectUrl();
     }
 
