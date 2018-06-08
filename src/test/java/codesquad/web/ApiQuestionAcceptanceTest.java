@@ -2,21 +2,15 @@ package codesquad.web;
 
 import codesquad.dto.QuestionDto;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import support.test.AcceptanceTest;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class ApiQuestionAcceptanceTest extends AcceptanceTest {
-    private static final Logger log = LoggerFactory.getLogger(ApiQuestionAcceptanceTest.class);
     private static final String PATH_CREATE = "/api/questions";
-    private static final String PATH_SHOW = "/api/questions/2";
     private static final String PATH_INVALID_SHOW = "/api/questions/100";
 
     private QuestionDto validQuestionDto() {
@@ -55,8 +49,12 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
 
     @Test
     public void read() {
-        ResponseEntity<QuestionDto> response = requestGet(PATH_SHOW, QuestionDto.class);
+        QuestionDto newQuestion = validQuestionDto();
+        String location = createResource(basicAuthTemplate(), PATH_CREATE, newQuestion);
+
+        ResponseEntity<QuestionDto> response = requestGet(location, QuestionDto.class);
         assertThat(response.getStatusCode(), is(HttpStatus.ACCEPTED));
+        ;
     }
 
     @Test

@@ -3,8 +3,6 @@ package support.test;
 import codesquad.domain.User;
 import codesquad.domain.UserRepository;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
@@ -12,8 +10,6 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
-
-import java.net.URI;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -37,7 +33,17 @@ public abstract class AcceptanceTest {
         return basicAuthTemplate(defaultUser());
     }
 
+    public TestRestTemplate basicAuthTemplate(User loginUser) {
+        return template.withBasicAuth(loginUser.getUserId(), loginUser.getPassword());
+    }
 
+    protected User defaultUser() {
+        return findByUserId(DEFAULT_LOGIN_USER);
+    }
+
+    protected User findByUserId(String userId) {
+        return userRepository.findByUserId(userId).get();
+    }
 
     protected <T> String createResource(TestRestTemplate template, String path, T bodyPayload) {
         ResponseEntity<String> response = requestPost(template, path, bodyPayload);
@@ -54,30 +60,10 @@ public abstract class AcceptanceTest {
     }
 
     protected <T> ResponseEntity<T> requestGet(String path, Class<T> responseType) {
-        return template().getForEntity(path, responseType);
+        return requestGet(template(), path, responseType);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-    public TestRestTemplate basicAuthTemplate(User loginUser) {
-        return template.withBasicAuth(loginUser.getUserId(), loginUser.getPassword());
-    }
-
-    protected User defaultUser() {
-        return findByUserId(DEFAULT_LOGIN_USER);
-    }
-
-    protected User findByUserId(String userId) {
-        return userRepository.findByUserId(userId).get();
+    protected <T> ResponseEntity<T> requestGet(TestRestTemplate template, String path, Class<T> responseType) {
+        return template.getForEntity(path, responseType);
     }
 }
