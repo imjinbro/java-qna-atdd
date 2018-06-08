@@ -1,35 +1,27 @@
 package codesquad.web;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import support.test.AcceptanceTest;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class ApiQnaAcceptanceTest {
-    private static final Logger log = LoggerFactory.getLogger(ApiQnaAcceptanceTest.class);
+public class ApiAnswerAcceptanceTest extends AcceptanceTest {
+    private static final Logger log = LoggerFactory.getLogger(ApiAnswerAcceptanceTest.class);
 
     @Test
-    public void create_answer() {
+    public void create() {
     }
 
     @Test
-    public void create_answer_fail_unAuthentication() {
+    public void create_fail_unAuthentication() {
     }
 
     @Test
-    public void create_answer_fail_invalid_answer() {
+    public void create_fail_invalid_answer() {
     }
 
     @Test
-    public void read() {
-    }
-
-    @Test
-    public void read_fail_deleted() {
+    public void read_not_delete_thing() {
     }
 
     @Test

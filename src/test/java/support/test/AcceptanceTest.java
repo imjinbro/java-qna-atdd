@@ -3,11 +3,20 @@ package support.test;
 import codesquad.domain.User;
 import codesquad.domain.UserRepository;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.net.URI;
+
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -27,6 +36,38 @@ public abstract class AcceptanceTest {
     public TestRestTemplate basicAuthTemplate() {
         return basicAuthTemplate(defaultUser());
     }
+
+
+
+    protected <T> String createResource(TestRestTemplate template, String path, T bodyPayload) {
+        ResponseEntity<String> response = requestPost(template, path, bodyPayload);
+        assertThat(response.getStatusCode(), is(HttpStatus.CREATED));
+        return response.getHeaders().getLocation().getPath();
+    }
+
+    protected <T> ResponseEntity<String> requestPost(TestRestTemplate template, String path, T bodyPayload) {
+        return template.postForEntity(path, bodyPayload, String.class);
+    }
+
+    protected <T> T requestGetForRest(TestRestTemplate template, String path, Class<T> responseType) {
+        return template.getForObject(path, responseType);
+    }
+
+    protected <T> ResponseEntity<T> requestGet(String path, Class<T> responseType) {
+        return template().getForEntity(path, responseType);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
 
     public TestRestTemplate basicAuthTemplate(User loginUser) {
         return template.withBasicAuth(loginUser.getUserId(), loginUser.getPassword());
