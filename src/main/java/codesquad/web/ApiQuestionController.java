@@ -28,9 +28,9 @@ public class ApiQuestionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<QuestionDto> show(@PathVariable Long id) {
+    public ResponseEntity<Question> show(@PathVariable Long id) {
         Question question = qnaService.findQuestionById(id);
-        return RestResponseEntityMaker.of(question.toQuestionDto(), question.generateApiUrl(), HttpStatus.ACCEPTED);
+        return RestResponseEntityMaker.of(question, question.generateApiUrl(), HttpStatus.OK);
     }
 
     @PutMapping("/{id}")

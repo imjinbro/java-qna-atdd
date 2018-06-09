@@ -1,5 +1,7 @@
 package codesquad.web;
 
+import codesquad.domain.Question;
+import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
@@ -52,14 +54,14 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         QuestionDto newQuestion = validQuestionDto();
         String location = createResource(basicAuthTemplate(), PATH_CREATE, newQuestion);
 
-        ResponseEntity<QuestionDto> response = requestGet(location, QuestionDto.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.ACCEPTED));
+        ResponseEntity<Question> response = requestGet(location, Question.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
         ;
     }
 
     @Test
     public void read_fail_deleted() {
-        ResponseEntity<QuestionDto> response = requestGet(PATH_INVALID_SHOW, QuestionDto.class);
+        ResponseEntity<Question> response = requestGet(PATH_INVALID_SHOW, Question.class);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
@@ -69,7 +71,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         basicAuthTemplate().put(path, update);
 
-        QuestionDto current = requestGetForRest(basicAuthTemplate(), path, QuestionDto.class);
+        Question current = requestGetForRest(basicAuthTemplate(), path, Question.class);
         assertEquals(update.getContents(), current.getContents());
     }
 
@@ -79,7 +81,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         template().put(path, update);
 
-        QuestionDto current = requestGetForRest(basicAuthTemplate(), path, QuestionDto.class);
+        Question current = requestGetForRest(basicAuthTemplate(), path, Question.class);
         assertNotEquals(update.getContents(), current.getContents());
     }
 
@@ -89,7 +91,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         basicAuthTemplate(findByUserId("sanjigi")).put(path, update);
 
-        QuestionDto current = requestGetForRest(basicAuthTemplate(), path, QuestionDto.class);
+        Question current = requestGetForRest(basicAuthTemplate(), path, Question.class);
         assertNotEquals(update.getContents(), current.getContents());
     }
 
@@ -98,7 +100,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         basicAuthTemplate().delete(path);
 
-        ResponseEntity<QuestionDto> response = requestGet(path, QuestionDto.class);
+        ResponseEntity<Question> response = requestGet(path, Question.class);
         assertThat(response.getStatusCode(), is(HttpStatus.BAD_REQUEST));
     }
 
@@ -107,8 +109,8 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         template().delete(path);
 
-        ResponseEntity<QuestionDto> response = requestGet(path, QuestionDto.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.ACCEPTED));
+        ResponseEntity<Question> response = requestGet(path, Question.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
@@ -116,11 +118,18 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
         String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
         basicAuthTemplate(findByUserId("sanjigi")).delete(path);
 
-        ResponseEntity<QuestionDto> response = requestGet(path, QuestionDto.class);
-        assertThat(response.getStatusCode(), is(HttpStatus.ACCEPTED));
+        ResponseEntity<Question> response = requestGet(path, Question.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 
     @Test
     public void delete_fail_exist_otherUser_Answer() {
+        String path = createResource(basicAuthTemplate(), PATH_CREATE, validQuestionDto());
+        String answerPath = path + "/answers";
+        createResource(basicAuthTemplate(findByUserId("sanjigi")), answerPath, new AnswerDto("test answer contents"));
+
+        basicAuthTemplate().delete(path);
+        ResponseEntity<Question> response = requestGet(path, Question.class);
+        assertThat(response.getStatusCode(), is(HttpStatus.OK));
     }
 }
