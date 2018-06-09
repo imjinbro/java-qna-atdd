@@ -29,13 +29,13 @@ public class ApiQuestionController {
 
     @GetMapping("/{id}")
     public ResponseEntity<QuestionDto> show(@PathVariable Long id) {
-        Question question = qnaService.findById(id);
+        Question question = qnaService.findQuestionById(id);
         return RestResponseEntityMaker.of(question.toQuestionDto(), question.generateApiUrl(), HttpStatus.ACCEPTED);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Void> update(@LoginUser User loginUser, @PathVariable Long id, @Valid @RequestBody QuestionDto updateQuestionDto) {
-        Question question = qnaService.update(loginUser, id, updateQuestionDto).toQuestion();
+        Question question = qnaService.updateQuestion(loginUser, id, updateQuestionDto).toQuestion();
         return RestResponseEntityMaker.of(question.generateApiUrl(), HttpStatus.OK);
     }
 

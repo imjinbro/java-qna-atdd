@@ -18,7 +18,7 @@ public class ApiQuestionAcceptanceTest extends AcceptanceTest {
     }
 
     private QuestionDto updateQuestionDto() {
-        return new QuestionDto("update title", "update content");
+        return new QuestionDto("updateQuestion title", "updateQuestion content");
     }
 
     private QuestionDto invalidQuestionDto() {

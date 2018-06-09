@@ -3,6 +3,7 @@ package codesquad.service;
 import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
 import codesquad.domain.*;
+import codesquad.dto.AnswerDto;
 import codesquad.dto.QuestionDto;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,28 +35,39 @@ public class QnaService {
         return questionRepo.save(question);
     }
 
-    public Question findById(Long id) {
+    public Question findQuestionById(Long id) {
         return questionRepo.findById(id).filter(question -> !question.isDeleted()).orElseThrow(EntityNotFoundException::new);
     }
 
-    public Question findById(User loginUser, Long id) {
-        Question question = findById(id);
+    public Question findQuestionById(User loginUser, Long id) {
+        Question question = findQuestionById(id);
         if (!question.isOwner(loginUser)) {
             throw new UnAuthorizedException();
         }
         return question;
     }
 
-    public QuestionDto update(User loginUser, Long id, QuestionDto updatedQuestionDto) {
+    public Answer findAnswerById(Long id) {
+        return answerRepo.findById(id).filter(answer -> !answer.isDeleted()).orElseThrow(EntityNotFoundException::new);
+    }
+
+    public QuestionDto updateQuestion(User loginUser, Long id, QuestionDto updatedQuestionDto) {
         Optional<Question> maybeQuestion = questionRepo.findById(id);
         QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(EntityNotFoundException::new);
-        questionRepo.save(maybeQuestion.get());
+        questionRepo.save(questionDto.toQuestion());
         return questionDto;
+    }
+
+    public AnswerDto updateAnswer(User loginUser, Long id, AnswerDto updatedAnswer) {
+        Optional<Answer> maybeAnswer = answerRepo.findById(id);
+        AnswerDto answerDto = maybeAnswer.map(answer -> answer.update(loginUser, updatedAnswer)).orElseThrow(EntityNotFoundException::new);
+        answerRepo.save(answerDto.toAnswer());
+        return answerDto;
     }
 
     @Transactional
     public void deleteQuestion(User loginUser, Long id) throws CannotDeleteException {
-        deleteHistoryService.saveAll(findById(id).delete(loginUser));
+        deleteHistoryService.saveAll(findQuestionById(id).delete(loginUser));
     }
 
     public List<Question> findAll() {
@@ -66,12 +78,16 @@ public class QnaService {
         return questionRepo.findAll(pageable).getContent();
     }
 
-    public Answer addAnswer(User loginUser, long questionId, String contents) {
-        return null;
+    public Answer addAnswer(User loginUser, long questionId, AnswerDto answerDto) {
+        Answer answer = answerDto.toAnswer().writeBy(loginUser).toQuestion(questionRepo.findById(questionId).orElseThrow(EntityNotFoundException::new));
+        answerRepo.save(answer);
+        return answer;
     }
 
-    public Answer deleteAnswer(User loginUser, long id) throws CannotDeleteException {
-        // TODO 답변 삭제 기능 구현 
-        return null;
+    public String deleteAnswer(User loginUser, long id) throws CannotDeleteException {
+        Answer answer = answerRepo.findById(id).orElseThrow(EntityNotFoundException::new);
+        deleteHistoryService.save(answer.delete(loginUser));
+        answerRepo.save(answer);
+        return answer.questionPath();
     }
 }
