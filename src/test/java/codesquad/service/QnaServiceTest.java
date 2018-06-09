@@ -2,10 +2,7 @@ package codesquad.service;
 
 import codesquad.CannotDeleteException;
 import codesquad.UnAuthorizedException;
-import codesquad.domain.Answer;
-import codesquad.domain.Question;
-import codesquad.domain.QuestionRepository;
-import codesquad.domain.User;
+import codesquad.domain.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +23,12 @@ public class QnaServiceTest {
 
     @Mock
     private QuestionRepository questionRepo;
+
+    @Mock
+    private AnswerRepository answerRepo;
+
+    @Mock
+    private DeleteHistoryService deleteHistoryService;
 
     @InjectMocks
     private QnaService qnaService;
