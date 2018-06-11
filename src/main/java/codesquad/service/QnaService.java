@@ -51,18 +51,16 @@ public class QnaService {
         return answerRepo.findById(id).filter(answer -> !answer.isDeleted()).orElseThrow(EntityNotFoundException::new);
     }
 
+    @Transactional
     public QuestionDto updateQuestion(User loginUser, Long id, QuestionDto updatedQuestionDto) {
         Optional<Question> maybeQuestion = questionRepo.findById(id);
-        QuestionDto questionDto = maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(EntityNotFoundException::new);
-        questionRepo.save(questionDto.toQuestion());
-        return questionDto;
+        return maybeQuestion.map(question -> question.update(loginUser, updatedQuestionDto)).orElseThrow(EntityNotFoundException::new);
     }
 
+    @Transactional
     public AnswerDto updateAnswer(User loginUser, Long id, AnswerDto updatedAnswer) {
         Optional<Answer> maybeAnswer = answerRepo.findById(id);
-        AnswerDto answerDto = maybeAnswer.map(answer -> answer.update(loginUser, updatedAnswer)).orElseThrow(EntityNotFoundException::new);
-        answerRepo.save(answerDto.toAnswer());
-        return answerDto;
+        return maybeAnswer.map(answer -> answer.update(loginUser, updatedAnswer)).orElseThrow(EntityNotFoundException::new);
     }
 
     @Transactional(rollbackFor = CannotDeleteException.class)
@@ -78,16 +76,15 @@ public class QnaService {
         return questionRepo.findAll(pageable).getContent();
     }
 
+    @Transactional
     public Answer addAnswer(User loginUser, long questionId, AnswerDto answerDto) {
-        Answer answer = answerDto.toAnswer().writeBy(loginUser).toQuestion(questionRepo.findById(questionId).orElseThrow(EntityNotFoundException::new));
-        answerRepo.save(answer);
-        return answer;
+        return answerDto.toAnswer().writeBy(loginUser).toQuestion(questionRepo.findById(questionId).orElseThrow(EntityNotFoundException::new));
     }
 
+    @Transactional(rollbackFor = CannotDeleteException.class)
     public String deleteAnswer(User loginUser, long id) throws CannotDeleteException {
         Answer answer = answerRepo.findById(id).orElseThrow(EntityNotFoundException::new);
         deleteHistoryService.save(answer.delete(loginUser));
-        answerRepo.save(answer);
         return answer.questionPath();
     }
 }
